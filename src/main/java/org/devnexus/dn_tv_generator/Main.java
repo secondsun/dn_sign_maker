@@ -7,13 +7,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -25,20 +23,40 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import org.apache.commons.io.IOUtils;
 
 public class Main {
 
     private static final String ROBOTO = "/RobotoCondensed-Regular.ttf";
-    private static final String ROBOTO_THIN = "/Roboto-Thin.ttf";
     private static final String DEVNEXUS_LOGO = "/dn_logo.png";
     private static final int PADDING_TOP = 27;
     private static final int PADDING_LEFT = 48;
     private static final int BACKGROUND_COLOR = 0xfffefefe;
     private static final String SCHEDULE = "/schedule.json";
-    private static final Date DAY_1 = new Date(1455580800000l);
+    private static final ExecutorService es = Executors.newFixedThreadPool(1);
     private static final Date DAY_2 = new Date(1455667200000l);
+    private static final List<Callable<Object>> todo = new ArrayList<>(5);
+
+    private static final BufferedImage logo;
+
+    static {
+        try {
+            logo = ImageIO.read(Main.class.getResourceAsStream(DEVNEXUS_LOGO));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     public static void main(String args[]) throws Exception {
 
@@ -54,8 +72,7 @@ public class Main {
         Font fontSmall = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream(ROBOTO));
         fontSmall = fontSmall.deriveFont(36F);
 
-        Font fontTiny = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream(ROBOTO_THIN));
-        fontTiny = fontSmall.deriveFont(24F);
+        Font fontTiny = fontSmall.deriveFont(24F);
 
         String scheduleJSON = IOUtils.toString(Main.class.getResourceAsStream(SCHEDULE));
         JsonElement scheduleJson = new JsonParser().parse(scheduleJSON);
@@ -162,8 +179,7 @@ public class Main {
                 } else {
                     speakersArray = session.get("presentation").getAsJsonObject().get("speakers").getAsJsonArray();
                 }
-                
-                
+
                 List<String> speakerNames = new ArrayList<>();
                 for (int i = 0; i < speakersArray.size(); i++) {
                     JsonObject speaker = speakersArray.get(i).getAsJsonObject();
@@ -184,7 +200,7 @@ public class Main {
                 }
             }
 
-            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/DevNexus/" + roomName + dateName + ".jpg"));
+            write(dateName, roomName, image);
 
         }
 
@@ -256,7 +272,7 @@ public class Main {
                     sessionTitle = session.get("presentation").getAsJsonObject().get("title").getAsString();
                 }
                 List<String> textList = StringUtils.wrap(sessionTitle, tileGraphics.getFontMetrics(), width - 80);
-                
+
                 if (textList.size() > 3) {
                     textList = textList.subList(0, 3);
                     String lastLine = textList.get(2);
@@ -279,7 +295,7 @@ public class Main {
                 } else {
                     speakersArray = session.get("presentation").getAsJsonObject().get("speakers").getAsJsonArray();
                 }
-             
+
                 List<String> speakerNames = new ArrayList<>();
                 for (int i = 0; i < speakersArray.size(); i++) {
                     JsonObject speaker = speakersArray.get(i).getAsJsonObject();
@@ -300,7 +316,7 @@ public class Main {
                 }
             }
 
-            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/DevNexus/" + roomName + dateName + ".jpg"));
+            write(dateName, roomName, image);
 
         }
 
@@ -311,7 +327,6 @@ public class Main {
     }
 
     private static void drawLogo(Graphics imageGfx) throws IOException {
-        BufferedImage logo = ImageIO.read(Main.class.getResourceAsStream(DEVNEXUS_LOGO));
 
         imageGfx.setColor(asColor(Color.TRANSLUCENT));
         imageGfx.drawImage(logo, PADDING_LEFT, PADDING_TOP, null);
@@ -321,6 +336,28 @@ public class Main {
     private static void fillBackGround(Graphics imageGfx) {
         imageGfx.setColor(asColor(BACKGROUND_COLOR));
         imageGfx.fillRect(0, 0, 1920, 1080);
+    }
+
+    public static boolean test(JsonObject session, Date date) {
+        return session.get("fromTime").getAsLong() < date.getTime();
+    }
+
+    private static void write(String dateName, String roomName, RenderedImage image) {
+
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(new File("/home/summers/Pictures/DevNexus/" + roomName + dateName + ".jpg"))) {
+            Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
+            ImageWriter writer;
+            writer = iter.next();
+            ImageWriteParam iwp = writer.getDefaultWriteParam();
+            iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            iwp.setCompressionQuality(0.99f);
+            writer.setOutput(ios);
+            writer.write(null, new IIOImage(image, null, null), iwp);
+            writer.dispose();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
     }
 
 }
