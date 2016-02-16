@@ -28,9 +28,14 @@ public class StringUtils {
    * @return a non-empty list of strings
    */
   public static List wrap(String str, FontMetrics fm, int maxWidth) {
-    ArrayList toReturn = new ArrayList(3);
-      wrapLineInto(str, toReturn, fm, maxWidth);
-      return toReturn;
+    List lines = splitIntoLines(str);
+    if (lines.size() == 0)
+      return lines;
+
+    ArrayList strings = new ArrayList();
+    for (Iterator iter = lines.iterator(); iter.hasNext();)
+      wrapLineInto((String) iter.next(), strings, fm, maxWidth);
+    return strings;
   }
 
   /**
@@ -47,30 +52,35 @@ public class StringUtils {
    *          maximum width of the line(s)
    */
   public static void wrapLineInto(String line, List list, FontMetrics fm, int maxWidth) {
-    StringBuilder builder = new StringBuilder();
-    int length = 0;
-    for (char character : line.toCharArray()) {
-        builder.append(character);
-        length += fm.charWidth(character);
-        if (length > maxWidth) {
-            String toSplit = builder.toString();
-            if (toSplit.lastIndexOf(" ") == -1) {//No whitespace to split on, just toss it on the screen.
-                length = 0;
-                builder = new StringBuilder();
-                if (character != ' ') {
-                    builder.append(character);
-                }
-                list.add(toSplit.substring(0, toSplit.length() - 1));
-            } else {
-                int lastSpace = toSplit.lastIndexOf(" ");
-                list.add(toSplit.subSequence(0, lastSpace));
-                length = 0;
-                builder = new StringBuilder().append(toSplit.subSequence(lastSpace, toSplit.length()).toString().trim());
-            }
+    int len = line.length();
+    int width;
+    while (len > 0 && (width = fm.stringWidth(line)) > maxWidth) {
+      // Guess where to split the line. Look for the next space before
+      // or after the guess.
+      int guess = len * maxWidth / width;
+      String before = line.substring(0, guess).trim();
+
+      width = fm.stringWidth(before);
+      int pos;
+      if (width > maxWidth) // Too long
+        pos = findBreakBefore(line, guess);
+      else { // Too short or possibly just right
+        pos = findBreakAfter(line, guess);
+        if (pos != -1) { // Make sure this doesn't make us too long
+          before = line.substring(0, pos).trim();
+          if (fm.stringWidth(before) > maxWidth)
+            pos = findBreakBefore(line, guess);
         }
+      }
+      if (pos == -1)
+        pos = guess; // Split in the middle of the word
+
+      list.add(line.substring(0, pos).trim());
+      line = line.substring(pos).trim();
+      len = line.length();
     }
-    list.add( builder.toString());
-     
+    if (len > 0)
+      list.add(line);
   }
 
   /**
