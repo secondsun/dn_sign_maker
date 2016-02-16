@@ -108,7 +108,7 @@ public class Main {
             int height = 400;
             int offset_x = 20;
             int offset_y = 180;
-            String dateName = "Tues";
+            String dateName = "Wednesday";
             for (JsonObject session : sessions) {
                 if (session.get("presentation") == null) {
                     continue;
@@ -211,7 +211,7 @@ public class Main {
             int height = 400;
             int offset_x = 20;
             int offset_y = 180;
-            String dateName = "Wed";
+            String dateName = "Tuesday";
             for (JsonObject session : sessions) {
                 if (session.get("presentation") == null) {
                     continue;
