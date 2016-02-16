@@ -133,7 +133,13 @@ public class Main {
                 tileGraphics.drawString(date, 20, 50);
 
                 tileGraphics.setFont(fontSmall);
-                List<String> textList = StringUtils.wrap(session.get("presentation").getAsJsonObject().get("title").getAsString(), tileGraphics.getFontMetrics(), width - 40);
+                String sessionTitle = "";
+                if (session.get("presentation").isJsonNull()) {
+                    sessionTitle = session.get("title").getAsString();
+                } else {
+                    sessionTitle = session.get("presentation").getAsJsonObject().get("title").getAsString();
+                }
+                List<String> textList = StringUtils.wrap(sessionTitle, tileGraphics.getFontMetrics(), width - 80);
                 if (textList.size() > 3) {
                     textList = textList.subList(0, 3);
                     String lastLine = textList.get(2);
@@ -150,7 +156,14 @@ public class Main {
                 tileGraphics.setFont(fontTiny);
                 int startSpeakers = 170 + (textList.size() - 1) * 30;
 
-                JsonArray speakersArray = session.get("presentation").getAsJsonObject().get("speakers").getAsJsonArray();
+                JsonArray speakersArray;
+                if (session.get("presentation").isJsonNull()) {
+                    speakersArray = new JsonArray();
+                } else {
+                    speakersArray = session.get("presentation").getAsJsonObject().get("speakers").getAsJsonArray();
+                }
+                
+                
                 List<String> speakerNames = new ArrayList<>();
                 for (int i = 0; i < speakersArray.size(); i++) {
                     JsonObject speaker = speakersArray.get(i).getAsJsonObject();
@@ -171,7 +184,7 @@ public class Main {
                 }
             }
 
-            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/" + roomName + dateName + ".jpg"));
+            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/DevNexus/" + roomName + dateName + ".jpg"));
 
         }
 
@@ -236,7 +249,14 @@ public class Main {
                 tileGraphics.drawString(date, 20, 50);
 
                 tileGraphics.setFont(fontSmall);
-                List<String> textList = StringUtils.wrap(session.get("presentation").getAsJsonObject().get("title").getAsString(), tileGraphics.getFontMetrics(), width - 40);
+                String sessionTitle = "";
+                if (session.get("presentation").isJsonNull()) {
+                    sessionTitle = session.get("title").getAsString();
+                } else {
+                    sessionTitle = session.get("presentation").getAsJsonObject().get("title").getAsString();
+                }
+                List<String> textList = StringUtils.wrap(sessionTitle, tileGraphics.getFontMetrics(), width - 80);
+                
                 if (textList.size() > 3) {
                     textList = textList.subList(0, 3);
                     String lastLine = textList.get(2);
@@ -253,7 +273,13 @@ public class Main {
                 tileGraphics.setFont(fontTiny);
                 int startSpeakers = 170 + (textList.size() - 1) * 30;
 
-                JsonArray speakersArray = session.get("presentation").getAsJsonObject().get("speakers").getAsJsonArray();
+                JsonArray speakersArray;
+                if (session.get("presentation").isJsonNull()) {
+                    speakersArray = new JsonArray();
+                } else {
+                    speakersArray = session.get("presentation").getAsJsonObject().get("speakers").getAsJsonArray();
+                }
+             
                 List<String> speakerNames = new ArrayList<>();
                 for (int i = 0; i < speakersArray.size(); i++) {
                     JsonObject speaker = speakersArray.get(i).getAsJsonObject();
@@ -274,7 +300,7 @@ public class Main {
                 }
             }
 
-            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/" + roomName + dateName + ".jpg"));
+            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/DevNexus/" + roomName + dateName + ".jpg"));
 
         }
 

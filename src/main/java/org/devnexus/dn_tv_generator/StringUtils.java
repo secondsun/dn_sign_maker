@@ -51,7 +51,7 @@ public class StringUtils {
     int length = 0;
     for (char character : line.toCharArray()) {
         builder.append(character);
-        length += fm.charWidth(character);
+        length = fm.stringWidth(builder.toString());
         if (length > maxWidth) {
             String toSplit = builder.toString();
             if (toSplit.lastIndexOf(" ") == -1) {//No whitespace to split on, just toss it on the screen.
@@ -69,7 +69,7 @@ public class StringUtils {
             }
         }
     }
-    list.add( builder.toString());
+    list.add( builder.toString().trim());
      
   }
 
