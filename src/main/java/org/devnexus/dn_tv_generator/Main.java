@@ -171,7 +171,7 @@ public class Main {
                 }
             }
 
-            ImageIO.write(image, "jpg", new File("/tmp/" + roomName + dateName + ".jpg"));
+            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/" + roomName + dateName + ".jpg"));
 
         }
 
@@ -274,7 +274,7 @@ public class Main {
                 }
             }
 
-            ImageIO.write(image, "jpg", new File("/tmp/" + roomName + dateName + ".jpg"));
+            ImageIO.write(image, "jpg", new File("/home/summers/Pictures/" + roomName + dateName + ".jpg"));
 
         }
 
