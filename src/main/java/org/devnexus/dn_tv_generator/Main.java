@@ -44,7 +44,7 @@ public class Main {
     private static final int PADDING_LEFT = 48;
     private static final int BACKGROUND_COLOR = 0xfffefefe;
     private static final String SCHEDULE = "/schedule.json";
-    private static final ExecutorService es = Executors.newFixedThreadPool(1);
+    private static final ExecutorService es = Executors.newFixedThreadPool(4);
     private static final Date DAY_2 = new Date(1455667200000l);
     private static final List<Callable<Object>> todo = new ArrayList<>(5);
 
@@ -81,7 +81,7 @@ public class Main {
         JsonObject item;
         for (int i = 0; i < items.size(); i++) {
             item = items.get(i).getAsJsonObject();
-            JsonObject room = item.get("room").getAsJsonObject();
+            JsonObject room = item.get("roomName").getAsJsonObject();
             String roomName = room.get("name").getAsString();
             Integer roomColor = Integer.parseInt(room.get("color").getAsString().replace("#", ""), 16);
             roomSessions.put(roomName, item);
@@ -91,7 +91,7 @@ public class Main {
 
         for (String roomName : roomSessions.keySet()) {
 
-            BufferedImage image = new BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB);
+            BufferedImage image = new BufferedImage(1080, 1920, BufferedImage.TYPE_INT_RGB);
             Graphics imageGfx = image.getGraphics();
 
             fillBackGround(imageGfx);
