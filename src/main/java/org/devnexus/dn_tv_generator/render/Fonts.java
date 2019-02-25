@@ -1,8 +1,9 @@
-package org.devnexus.dn_tv_generator;
+package org.devnexus.dn_tv_generator.render;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
+import org.devnexus.dn_tv_generator.Main;
 
 public final class Fonts {
 

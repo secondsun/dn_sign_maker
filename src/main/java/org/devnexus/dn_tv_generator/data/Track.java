@@ -1,4 +1,4 @@
-package org.devnexus.dn_tv_generator;
+package org.devnexus.dn_tv_generator.data;
 
 import java.awt.Color;
 

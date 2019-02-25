@@ -18,6 +18,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
+import org.devnexus.dn_tv_generator.data.DateRoom;
+import org.devnexus.dn_tv_generator.data.Session;
+import org.devnexus.dn_tv_generator.data.SessionMapper;
+import org.devnexus.dn_tv_generator.render.Fonts;
 
 public class Main {
 
