@@ -46,6 +46,12 @@ public class SessionMapper {
           JsonArray sessionsArray = roomScheduleEntry.getValue().getAsJsonArray();
           for (int j = 0; j < sessionsArray.size(); j++) {
             JsonObject roomObject = sessionsArray.get(j).getAsJsonObject();
+
+            if (roomObject.get("track").getAsString().equalsIgnoreCase("other") ||
+                roomObject.get("track").getAsString().equalsIgnoreCase("keynote")) {
+              continue;
+            }
+            
             String startDatePart = roomObject.get("date").getAsString().split("-05:00")[0];
 
             Date startDate = format.parse(startDatePart);
@@ -93,6 +99,7 @@ public class SessionMapper {
     List<Session> sessions =
         map.keySet().stream()
             .filter(entry -> entry.sessionTime.after(DAY_TWO_MIDNIGHT))
+            .filter(entry -> entry.sessionTrack.equals(track))
             .map(entry -> map.get(entry))
             .collect(Collectors.toList())
         ;

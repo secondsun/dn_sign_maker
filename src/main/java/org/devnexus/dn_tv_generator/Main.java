@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -32,7 +33,7 @@ public class Main {
     private static final int BACKGROUND_COLOR = 0x000;
 
     private static final BufferedImage logo;
-
+    private static final SimpleDateFormat dayNameFormatter = new SimpleDateFormat("EEEE");
     private static Fonts fonts = Fonts.getInstance();
     
     static {
@@ -48,7 +49,13 @@ public class Main {
         SessionMapper sessionMapper = SessionMapper.getMapper();
 
         for (DateRoom dateTrack : sessionMapper.map.keySet()) {
-            List<Session> sessions = sessionMapper.getDayOneSessionForRoom(dateTrack.sessionTrack);
+            final String dateName = dayNameFormatter.format(dateTrack.sessionTime);
+            List<Session> sessions;
+            if (dateName.equals("Thursday")) {
+                sessions= sessionMapper.getDayOneSessionForRoom(dateTrack.sessionTrack);
+            } else {
+                sessions= sessionMapper.getDayTwoSessionForRoom(dateTrack.sessionTrack);
+            }
             
             BufferedImage image = new BufferedImage(1080, 1920, BufferedImage.TYPE_INT_RGB);
             Graphics imageGfx = image.getGraphics();
@@ -59,8 +66,10 @@ public class Main {
             drawRoomInfo(imageGfx, dateTrack);
             drawSchedules(imageGfx, dateTrack, sessions);
 
+            
+            
             final String roomName = dateTrack.sessionTrack.roomName;
-            final String dateName = "Wednesday";
+            
             
 
             write(dateName, roomName, image);
@@ -85,17 +94,22 @@ public class Main {
             return;
         }
         
-        int width = 1040;
+        int width = 1050;
         int height = 200;
-        int offset_x = 20;
+        int offset_x = 15;
         int offset_y = 300;
 
         for (Session session : sessions) {
 
-            DateFormat format = new SimpleDateFormat("hh:mm");
+            DateFormat timeFormat = new SimpleDateFormat("kk:mm");
             BufferedImage tile = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
             Graphics2D tileGraphics = (Graphics2D) tile.getGraphics();
+            
+            String time = timeFormat.format(session.fromTime);
+            Rectangle2D timeBounds = imageGfx.getFontMetrics()
+                .getStringBounds(time, tileGraphics);
+            
             tileGraphics.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -105,12 +119,15 @@ public class Main {
 
             tileGraphics.setColor(Color.WHITE);
             tileGraphics.setFont(fonts.font);
-            tileGraphics.drawString(format.format(session.fromTime), 20, 50);
+            tileGraphics.drawString(time, 20, height/2 + (int)(timeBounds.getHeight())/4);
 
-            tileGraphics.setFont(fonts.fontSmall);
             String sessionTitle = session.title;
 
-            List<String> textList = StringUtils.wrap(sessionTitle, tileGraphics.getFontMetrics(), width - 80);
+            
+
+
+            List<String> textList = StringUtils.wrap(sessionTitle, tileGraphics.getFontMetrics(),
+                (int) (width - 40 - (timeBounds.getWidth())));
             if (textList.size() > 3) {
                 textList = textList.subList(0, 3);
                 String lastLine = textList.get(2);
@@ -118,20 +135,28 @@ public class Main {
                 textList.remove(2);
                 textList.add(lastLine);
             }
+            
+            Rectangle2D titleBounds = imageGfx.getFontMetrics()
+                .getStringBounds(sessionTitle, tileGraphics);
+            
+            int lineHeight = (int) titleBounds.getHeight();
 
-            tileGraphics.setFont(fonts.fontSmall);
-            for (int i = 0; i < textList.size(); i++) {
-                tileGraphics.drawString(textList.get(i), 20, 110 + 40 * i);
+            if (textList.size() == 1) {
+                tileGraphics.drawString(sessionTitle, 40 + (int)timeBounds.getWidth(), height/2 + (lineHeight)/4);    
+            } else if (textList.size() == 2) {
+                tileGraphics.drawString(textList.get(0), 40 + (int)timeBounds.getWidth(), height/2 + 20 - (lineHeight)/3);
+                tileGraphics.drawString(textList.get(1), 40 + (int)timeBounds.getWidth(), height/2 + 20 + (lineHeight)/3);
+            } else {
+                tileGraphics.drawString(textList.get(0), 40 + (int)timeBounds.getWidth(), height/2 - 15 - (lineHeight)/4);
+                tileGraphics.drawString(textList.get(1), 40 + (int)timeBounds.getWidth(), height/2 - 5 + (lineHeight)/4);
+                tileGraphics.drawString(textList.get(2), 40 + (int)timeBounds.getWidth(), height/2 + 25 +  (lineHeight)/2);
             }
-
-            tileGraphics.setFont(fonts.fontTiny);
+            
+            
+            
 
             imageGfx.drawImage(tile, offset_x, offset_y, null);
-            offset_x += width + 20;
-            if (offset_x > 1800) {
-                offset_x = 20;
-                offset_y = offset_y + height + PADDING_TOP;
-            }
+            offset_y = offset_y + height + PADDING_TOP;
         }
 
 
@@ -148,8 +173,7 @@ public class Main {
         String dateString = format.format(date);
         int width = 1080;
         int height = 100;
-        int offset_x = 20;
-        int offset_y = 20;
+
         
         BufferedImage tile = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
@@ -162,7 +186,7 @@ public class Main {
 
         imageGfx.setFont(fonts.fontHuge);
 
-        imageGfx.drawString(dateString, (1080 - (int) imageGfx.getFontMetrics().getStringBounds(dateString, imageGfx).getWidth()) / 2, 260);
+        imageGfx.drawString(dateString, (1080 - (int) imageGfx.getFontMetrics().getStringBounds(dateString, imageGfx).getWidth()) / 2, 220);
 
 
 

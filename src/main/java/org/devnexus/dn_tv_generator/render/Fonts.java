@@ -21,13 +21,13 @@ public final class Fonts {
 
       Font fontHuge = Font
           .createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/Roboto-Bold.ttf"));
-      this.fontHuge = fontHuge.deriveFont(96F);
+      this.fontHuge = fontHuge.deriveFont(64F);
 
-      Font font = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream(ROBOTO));
+      Font font = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/Roboto-Bold.ttf"));
       this.font = font.deriveFont(48F);
 
-      Font fontSmall = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream(ROBOTO));
-      this.fontSmall = fontSmall.deriveFont(36F);
+      Font fontSmall  = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/Roboto-Bold.ttf"));
+      this.fontSmall = fontSmall.deriveFont(46F);
 
       this.fontTiny = fontSmall.deriveFont(24F);
     } catch (FontFormatException | IOException e) {
